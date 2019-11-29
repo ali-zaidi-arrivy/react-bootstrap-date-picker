@@ -362,13 +362,13 @@ export default createReactClass({
     return state;
   },
 
-  makeDateValues(isoString) {
+  makeDateValues(isoString, dateFormat = null) {
     let displayDate;
     const selectedDate = isoString ? new Date(`${isoString.slice(0,10)}T12:00:00.000Z`) : null;
     const minDate = this.props.minDate ? new Date(`${this.props.minDate.slice(0,10)}T12:00:00.000Z`) : null;
     const maxDate = this.props.maxDate ? new Date(`${this.props.maxDate.slice(0,10)}T12:00:00.000Z`) : null;
 
-    const inputValue = isoString ? this.makeInputValueString(selectedDate) : null;
+    const inputValue = isoString ? this.makeInputValueString(selectedDate, dateFormat) : null;
     if (selectedDate) {
       displayDate = new Date(selectedDate);
     } else {
@@ -483,16 +483,17 @@ export default createReactClass({
     }
   },
 
-  makeInputValueString(date) {
+  makeInputValueString(date, dateFormat = null) {
     const month = date.getMonth() + 1;
     const day = date.getDate();
 
+    const dateFormatToBeUsed = dateFormat?dateFormat:this.props.dateFormat
     //this method is executed during intialState setup... handle a missing state properly
-    const separator = (this.state ? this.state.separator : this.props.dateFormat.match(/[^A-Z]/)[0]);
-    if (this.props.dateFormat.match(/MM.DD.YYYY/)) {
+    const separator = (this.state ? this.state.separator : dateFormatToBeUsed.match(/[^A-Z]/)[0]);
+    if (dateFormatToBeUsed.match(/MM.DD.YYYY/)) {
       return (month > 9 ? month : `0${month}`) + separator + (day > 9 ? day : `0${day}`) + separator + date.getFullYear();
     }
-    else if (this.props.dateFormat.match(/DD.MM.YYYY/)) {
+    else if (dateFormatToBeUsed.match(/DD.MM.YYYY/)) {
       return (day > 9 ? day : `0${day}`) + separator + (month > 9 ? month : `0${month}`) + separator + date.getFullYear();
     }
     else {
@@ -625,7 +626,7 @@ export default createReactClass({
   componentWillReceiveProps(newProps) {
     const value = newProps.value;
     if (this.getValue() !== value) {
-      this.setState(this.makeDateValues(value));
+      this.setState(this.makeDateValues(value, newProps.dateFormat));
     }
   },
 
